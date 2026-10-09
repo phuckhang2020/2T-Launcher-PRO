@@ -6,7 +6,7 @@ Notable changes to this project are documented here.
 
 - No changes yet.
 
-## [1.0.0] - Pending release
+## [1.0.0] - 2026-10-09
 
 - Prepare the initial public launcher release.
 - Add launcher entry search, category filtering, and management.
