@@ -1,0 +1,24 @@
+# Local launcher data may contain usernames and machine-specific paths.
+/data/
+/logs/
+
+# Work-specific scripts and documents are not part of the public launcher.
+/scripts/
+
+# Editor and operating-system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# AutoHotkey build output and backups
+*.exe
+*.bak
+*.old
+*.tmp
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
