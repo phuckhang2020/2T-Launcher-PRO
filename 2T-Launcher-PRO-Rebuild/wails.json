@@ -1,0 +1,15 @@
+{
+  "name": "2t-launcher-pro-rebuild",
+  "outputfilename": "2T Launcher PRO",
+  "frontend:dir": "frontend",
+  "frontend:install": "npm install",
+  "frontend:build": "npm run build",
+  "frontend:dev:watcher": "npm run dev",
+  "frontend:dev:serverUrl": "auto",
+  "info": {
+    "companyName": "Tam Truong",
+    "productName": "2T Launcher PRO",
+    "productVersion": "1.1.0",
+    "copyright": "Copyright (c) Tam Truong"
+  }
+}

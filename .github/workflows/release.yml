@@ -15,14 +15,70 @@ jobs:
       - name: Check out source
         uses: actions/checkout@v4
 
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.24.12
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install NSIS
+        shell: pwsh
+        run: |
+          choco install nsis --yes --no-progress
+          $makensis = Get-Command makensis -ErrorAction SilentlyContinue
+          if (!$makensis) { throw "NSIS makensis.exe was not added to PATH." }
+          Split-Path $makensis.Source | Out-File -FilePath $env:GITHUB_PATH -Append
+
+      - name: Install Wails CLI
+        shell: pwsh
+        run: |
+          go install github.com/wailsapp/wails/v2/cmd/wails@v2.10.2
+          "$env:USERPROFILE\go\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
+
+      - name: Build desktop installer and portable app
+        shell: pwsh
+        run: |
+          if ($env:GITHUB_REF_NAME -notmatch '^v\d+\.\d+\.\d+$') {
+            throw "Release tags must use vMAJOR.MINOR.PATCH (for example, v1.1.0)."
+          }
+          Push-Location "2T-Launcher-PRO-Rebuild\frontend"
+          npm ci
+          Pop-Location
+          Push-Location "2T-Launcher-PRO-Rebuild"
+          wails build -nsis
+          if ($LASTEXITCODE -ne 0) { throw "Wails build failed." }
+          Pop-Location
+
+          $buildDir = Join-Path $PWD "2T-Launcher-PRO-Rebuild\build\bin"
+          $portableExe = Join-Path $buildDir "2T Launcher PRO.exe"
+          $installerSource = Get-ChildItem -Path $buildDir -Filter "*-amd64-installer.exe" | Select-Object -First 1
+          if (!(Test-Path $portableExe)) { throw "Portable executable was not created: $portableExe" }
+          if (!$installerSource) { throw "NSIS installer was not created." }
+
+          $tag = $env:GITHUB_REF_NAME
+          $portableStage = Join-Path $env:RUNNER_TEMP "2T-Launcher-PRO-Portable"
+          New-Item -ItemType Directory -Force -Path $portableStage | Out-Null
+          Copy-Item $portableExe (Join-Path $portableStage "2T Launcher PRO.exe")
+          Copy-Item "README.md", "LICENSE" -Destination $portableStage
+          $portableArchive = Join-Path $env:RUNNER_TEMP "2T-Launcher-PRO-$tag-Portable.zip"
+          Compress-Archive -Path (Join-Path $portableStage "*") -DestinationPath $portableArchive
+          $installer = Join-Path $env:RUNNER_TEMP "2T-Launcher-PRO-$tag-Setup.exe"
+          Copy-Item $installerSource.FullName $installer
+          "PORTABLE_ARCHIVE=$portableArchive" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "INSTALLER_PATH=$installer" | Out-File -FilePath $env:GITHUB_ENV -Append
+
       - name: Package public launcher files
         shell: pwsh
         run: |
           if ($env:GITHUB_REF_NAME -notmatch '^v\d+\.\d+\.\d+$') {
-            throw "Release tags must use vMAJOR.MINOR.PATCH (for example, v1.0.0)."
+            throw "Release tags must use vMAJOR.MINOR.PATCH (for example, v1.1.0)."
           }
           $stage = Join-Path $env:RUNNER_TEMP "2T-Launcher-PRO"
-          $archive = Join-Path $env:RUNNER_TEMP "2T-Launcher-PRO-$env:GITHUB_REF_NAME.zip"
+          $archive = Join-Path $env:RUNNER_TEMP "2T-Launcher-PRO-$env:GITHUB_REF_NAME-AHK-Source.zip"
           New-Item -ItemType Directory -Path $stage | Out-Null
           Copy-Item -Path "2T Launcher PRO.ahk", "Lib", "README.md", "CHANGELOG.md", "LICENSE" -Destination $stage -Recurse
           Compress-Archive -Path (Join-Path $stage "*") -DestinationPath $archive
@@ -33,6 +89,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: pwsh
         run: |
-          gh release create "$env:GITHUB_REF_NAME" "$env:ARCHIVE_PATH" `
+          gh release create "$env:GITHUB_REF_NAME" `
+            "$env:INSTALLER_PATH" "$env:PORTABLE_ARCHIVE" "$env:ARCHIVE_PATH" `
             --title "2T Launcher PRO $env:GITHUB_REF_NAME" `
             --generate-notes

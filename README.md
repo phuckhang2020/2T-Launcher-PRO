@@ -1,28 +1,38 @@
 # 2T Launcher PRO
 
-A lightweight Windows launcher for AutoHotkey scripts, files, and folders.
+A Windows launcher for scripts, files, and folders, available as a desktop
+application and as the original AutoHotkey edition.
 
 ## Features
 
-- Search and filter launcher entries by category.
-- Add AutoHotkey scripts and file or folder shortcuts.
-- Edit, remove, and launch saved entries.
-- Choose a theme and configure a global launcher hotkey.
-- Review the local activity log.
+- Add, edit, search, open, run, and bulk-remove file, folder, and AHK entries.
+- Create and manage categories, filter the list, and reorder categories.
+- Use English or Vietnamese, light or dark appearance, and pane or dropdown
+	category navigation.
+- Configure AutoHotkey when needed; ordinary files and folders do not require it.
+- Review local activity history and current CPU, memory, and GPU usage.
+- Install the Wails desktop edition or run its portable executable.
 
 ## Requirements
 
 - Windows.
-- [AutoHotkey v2](https://www.autohotkey.com/).
+- Windows 10/11 with WebView2 Runtime for the desktop edition.
+- [AutoHotkey](https://www.autohotkey.com/) only when running `.ahk` entries.
 
 ## Install and run
 
-1. Download and extract the ZIP from the latest [GitHub Release](https://github.com/phuckhang2020/2T-Launcher-PRO/releases).
-2. Install AutoHotkey v2 if it is not already installed.
-3. Run `2T Launcher PRO.ahk`.
-4. Use **Add Script** or **Add File/Folder** to add your own launcher entries.
+1. Download **2T Launcher PRO Setup** from the latest [GitHub Release](https://github.com/phuckhang2020/2T-Launcher-PRO/releases) and run the installer, or download and extract the **Portable** ZIP.
+2. Add files and folders directly. To run an `.ahk` entry, select the AutoHotkey executable in Settings; the app links to the AutoHotkey homepage if it is not configured.
 
-The launcher starts with an empty list. Add your own entries from the application. It stores the editable list and settings under `data/` and its activity log under `logs/`, next to the launcher. These are created locally as needed and are intentionally excluded from version control and release archives. The repository does not include organization-specific automation scripts or work files.
+The original AutoHotkey edition remains available in the release source ZIP as
+`2T Launcher PRO.ahk`. It requires AutoHotkey v2 and can be run independently
+of the desktop edition.
+
+The desktop edition stores its library, settings, and history separately under
+the current user's configuration directory. The original AHK edition stores
+data in `data/` and logs in `logs/` next to its script. These stores are not
+shared or imported automatically. The repository does not include private
+automation scripts or work files.
 
 ## Repository layout
 
@@ -34,12 +44,15 @@ The launcher starts with an empty list. Add your own entries from the applicatio
 |-- Lib/
 |   `-- Jxon.ahk
 |-- 2T Launcher PRO.ahk
+|-- 2T-Launcher-PRO-Rebuild/
+|   `-- Go + Wails desktop application
 |-- CHANGELOG.md
 |-- LICENSE
 └-- README.md
 ```
 
-The main script stays at the repository root so its relative library path and the documented launch steps remain stable.
+The legacy main script stays at the repository root so its relative library
+path remains stable.
 
 ## Privacy and support
 
@@ -49,7 +62,10 @@ Use GitHub Issues to report reproducible bugs or suggest general improvements. F
 
 ## Releases
 
-Releases are created from version tags in the form `vMAJOR.MINOR.PATCH` (for example, `v1.0.0`). Pushing a version tag runs the GitHub Actions release workflow, which creates a source ZIP containing only the launcher, its required library, and public project documentation.
+Releases are created from version tags in the form `vMAJOR.MINOR.PATCH` (for
+example, `v1.1.0`). Pushing a version tag runs the GitHub Actions release
+workflow, which publishes the desktop installer, portable ZIP, and legacy AHK
+source ZIP.
 
 See [CHANGELOG.md](CHANGELOG.md) for changes.
 
