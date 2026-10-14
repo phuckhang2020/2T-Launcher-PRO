@@ -28,10 +28,11 @@ jobs:
       - name: Install NSIS
         shell: pwsh
         run: |
-          choco install nsis --yes --no-progress
-          $makensis = Get-Command makensis -ErrorAction SilentlyContinue
-          if (!$makensis) { throw "NSIS makensis.exe was not added to PATH." }
-          Split-Path $makensis.Source | Out-File -FilePath $env:GITHUB_PATH -Append
+          choco install nsis --yes --no-progress --limit-output
+          # choco does not refresh PATH in the current session, so probe the install dirs.
+          $dir = @("${env:ProgramFiles(x86)}\NSIS", "$env:ProgramFiles\NSIS") | Where-Object { Test-Path (Join-Path $_ "makensis.exe") } | Select-Object -First 1
+          if (!$dir) { throw "NSIS makensis.exe was not found after install." }
+          $dir | Out-File -FilePath $env:GITHUB_PATH -Append
 
       - name: Install Wails CLI
         shell: pwsh
